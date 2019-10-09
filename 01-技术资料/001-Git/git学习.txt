@@ -1,0 +1,279 @@
+一、创建版本库
+1、创建目录
+mkdir learngit
+cd learngit
+pwd
+
+2、将目录初始化为Git仓库
+git INIT
+ls -ah
+
+注意：git只能跟踪txt文件的变动
+
+二、添加文件到版本库
+1、创建文件
+vi readme.txt
+内容
+Git is a version control system.
+Git is free software.
+
+2、添加文件到仓库的暂存区
+git add readme.txt
+
+可以同时add多个文件
+git add file1.txt file2.txt
+
+3、提交暂存区文件到本地仓库
+	commit文件必须添加注释
+	commit可以一次提交多个文件，可以先多次add不同的文件，然后一次commit
+git commit -m "wrote a readme file"
+
+
+三、修改文件
+1、修改文件
+vi readme.txt
+内容
+Git is a distributed version control system.
+Git is free software.
+
+2、查看git状态：是否有修改、是否有add
+git status
+
+3、查看具体某个文件的内容与已经commit的该文件内容的区别
+git diff readme.txt
+
+4、add，commit
+git add readme.txt
+git commit -m "change readme.txt"
+
+四、版本回退
+1、查看版本历史
+git log
+
+简化日志
+git log --pretty=oneline
+
+注意：输出的一串字符为commit id(版本号)
+
+注意：在Git中，HEAD表示当前版本，也就是最新的提交，上一个版本是 HEAD^，上上个版本是 HEAD^^，上100个版本是HEAD~100
+
+2、回退
+git reset --hard HEAD^
+
+注意：回退了以后原来的最新的版本就不见了
+
+3、前进
+如果当前窗口没关闭，找到原来的最新版本，取版本号前几位，没必要写全
+git reset --hard fdf8f34e5
+
+如果关闭了当前窗口，想前进到原来的最薪版本
+git reflog
+找到想要去到的版本
+git reset --hard 49b226c
+
+五、工作区、版本库、暂存区、主分支、其它分支，当前分支
+1、工作区
+	就是当前正在正在工作的区域
+2、版本库
+	Git仓库所在目录的 .git文件夹
+3、暂存区
+	Git仓库中暂时存储 add以后文件的地方
+4、分支
+	add的文件需要commit提交以后才能进入分支
+5、主分支
+	自动创建的第一个分支，默认为master
+6、其它分支
+	建好主分支以后手动创建的其它分支
+7、当前分支
+	HEAD指针指向的分支，默认指向master主分支
+	
+注意：
+	1、一旦提交以后，如果没有对工作区做任何修改，那么工作区就是干净的
+		git status
+		On branch master
+		nothing to commit, working tree clean
+	2、管理修改
+		Git管理的是修改，而不是文件
+
+六、撤销修改
+1、工作区文件错误
+可以手动修改
+也可以用命令修改工作区修改
+	git checkout -- readme.txt  (把工作区修改全部撤销)
+	a) 如果修改后没有添加到暂存区，则撤销修改后回到和版本库一样的状态
+	b) 如果已经添加到暂存区，又做了修改，撤销后回到添加到暂存区后的状态
+	总之，就是让这个文件回到最近一次git commit或git add 时的状态
+	
+注意：
+	如果 git checkout -- readme.txt 去掉 -- ,则变为变更分支的命令
+2、暂存区文件错误
+将暂存区文件回退到工作区
+git reset HEAD readme.txt
+丢弃工作区修改
+git checkout -- readme.txt
+
+注意：
+	git reset 既可以回退版本，也可以吧暂存区的修改回退到工作区。当使用HEAD时，表示最新的版本
+
+3、已提交文件错误
+如果已经提交，但是还没有推送到远程，使用版本回退
+
+七、删除文件
+1、删除工作区文件
+rm readme.txt
+2、删除版本库文件
+git rm
+git commit -m "remove readme.txt"
+	
+	小提示：先手动删除文件，然后使用git rm <file>和git add<file>效果是一样的
+
+3、误删工作区文件，回复到最新版
+git checkout -- readme.txt
+
+注意：
+	git checkout -- file  其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”
+
+八、远程仓库
+1、搭建一台远程Git服务器
+	可以使用GitHub，免费的Git仓库托管服务提供网站
+2、本地Git仓库和GitHub仓库之间通过SSH加密传输，需要设置SSH key 免密传输
+	a) 创建SSH Key
+		在用户主目录（windows下为当前登录用户的根目录，打开Shell Bash的时候的默认目录，例如：/c/Users/renxiaowei7）下，看看有没有 .ssh 目录，
+		如果有，再看看这个目录下有没有 id_rsa(私钥) 和 id_rsa.pub(公钥) 这两个文件如果有，直接跳到下一步。
+		如果没有，打开Shell（windows下打开Git Bash），创建SSH Key：
+			ssh-keygen -t rsa -C "18234122488@example.com"
+	b) 登录GitHub，打开"Account settings","SSH Keys"页面
+		点击"Add SSH Key",填上任意Title，在Key文本框里粘贴 id_rsa.pub文件的内容
+		点击"Add Key"，就可以看到已经添加的Key了
+	注意：
+		GitHub可以添加多个Key，允许多台电脑往GitHub推送内容
+3、添加远程库(先有本地库，后有远程库，本地库关联远程库)
+	在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步，
+	这样，GitHub上的仓库既可以作为备份，又可以让其他人通过该仓库来协作
+	a) 登录GitHub，右上角找到"Create a new repo"按钮，创建一个新的仓库，在Repository name填入learngit，其它保持默认设置，点击"Create repository"按钮，就成功地创建了一个新的Git仓库
+	b) 新创建的仓库是空的，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地库与之关联，就可以把本地仓库的内容推送到GitHub仓库
+	c) 关联本地仓库和远程仓库
+		git remote add origin git@github.com:renxiaowei-1991/learngit.git
+		其中：
+			origin 表示对于本地库来说远程库的名称，默认为 origin
+	d) 推送本地库内容到远程库
+		git push -u origin master
+		其中：
+			master 表示当前分支master
+			origin 表示远程库名称
+			-u 由于远程库是空的，第一次推送master分支时，加上了-u参数表示将本地master分支与远程master分支关联起来，以后就可以使用简化命令
+		简化命令
+			git push origin master
+4、从远程库克隆(先有远程库，从远程库克隆本地库)
+	a) 登录GitHub，创建新库，勾选 Initialize this repository with a README,这样GitHub会自动创建一个README.md文件
+	b) 克隆本地库
+		git clone git@github.com:renxiaowei-1991/learngit.git (速度较快，ssh协议)
+		git clone https://github.com/renxiaowei-1991/learngit (数据较慢，http协议)
+
+九、分支管理
+	开发一个新功能的时候可以单独建立一个分支，等开发完毕以后再合并到主分支
+	HEAD指向的是当前分支，默认为master
+	工作区的修改和提交针对的是当前分支
+1、创建分支
+git checkout -b dev (创建+切换分支)
+(新版： git switch -c dev)
+相当于
+git branch dev (创建分支)
+git checkout dev (切换分支)
+2、切换分支
+git checkout dev
+(新版： git switch master)
+3、查看分支
+git branch
+4、合并分支
+git merge dev
+	注意：
+		Fast-forward 表示快进合并模式
+5、删除分支
+git branch -d dev
+6、解决冲突
+	在两个分支上分别对同一个文件进行修改提交，合并的时候会有冲突
+查看状态
+	git status 
+查看冲突文件
+	cat readme.txt
+	
+	Git is a distributed version control system.
+	Git is free software distributed under the GPL.
+	Git has a mutable index called stage.
+	Git tracks changes of files.
+	<<<<<<< HEAD
+	Creating a new branch is quick & simple.
+	=======
+	Creating a new branch is quick AND simple.
+	>>>>>>> feature1
+	
+	Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容，我们修改如下后保存
+	
+手动处理冲突后，重新提交，然后合并分支即可
+上面的文件改为如下所示，或者和另一个分支的提交人员沟通，解决冲突
+	Git is a distributed version control system.
+	Git is free software distributed under the GPL.
+	Git has a mutable index called stage.
+	Git tracks changes of files.
+	Creating a new branch is quick AND simple.
+
+7、查看分支合并图
+git log --graph
+git log --graph --pretty=oneline
+git log --graph --pretty=oneline --abbrev-commit
+
+8、分支模式
+	默认使用 Fast forward ,删除分支后，会丢掉信息。如果要禁用 Fast forward 模式，Git就会在merge时生成一个新的commit，这样从分支历史就可以看出分支信息
+	git merge --no-ff -m "merge with no-ff" dev
+	其中：
+		merge 表示合并分支
+		--no-ff 表示禁用 Fast forward 模式
+		-m 表示合并的时候的注释
+		dev 表示被合并的分支名
+
+十、保存现场及恢复
+	如果工作到一半，需要解决问题，需要创建bug分支，但是当前分支工作没完成，不能提交，需要保留工作区现场，使用储藏(stash)功能
+	把现场储藏以后，工作区就是干净的了，就可以切换到其它分区了
+1、储藏工作区现场
+git stash
+2、查看已经储藏的工作区列表
+git stash list
+内容：
+	stash@{0}: WIP on dev: f52c633 add merge
+3、恢复被储藏的工作区现场
+git stash apply stash@{0} (恢复后，stash内容不删除，需要使用 git stash drop 来删除)
+git stash pop stash@{0}   (恢复后，stash内容删除)
+4、获取特定的提交到当前分区
+git cherry-pick 4c805e2
+5、删除没有被合并的分支
+git branch -D dev
+其中 -D 必须是大写
+
+十一、多人协作
+1、查看远程库信息
+git remote
+git remote -v
+2、推送本地分支到远程库
+git push origin dev (dev 为本地分支)
+3、从远程库拉去分支
+git checkout -b dev origin/dev 
+如果报错，则先用 git pull 拉取远程库变更，在拉取分支
+	fatal: 'origin/dev' is not a commit and a branch 'dev' cannot be created from it
+
+git pull 
+git checkout -b dev origin/dev 
+4、如果推送有冲突，先拉取远程分支到本地，解决冲突，然后再推送
+git pull
+5、如果git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，
+设置dev和origin/dev的链接
+git branch --set-upstream-to=origin/dev dev
+结果
+	Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+git pull
+
+十二、rebase ： 将日志图表合并成一条直线
+git rebase
+
+十三、标签管理
+	发布一个版本时，通常先再版本库中打一个标签(tag)，这样就唯一确定了打标签时刻的版本。以后无论什么时候，取某个标签的版本就是把那个打标签的时刻的历史版本取出来。所以标签也是版本库的一个快照
